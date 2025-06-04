@@ -87,7 +87,28 @@
     </section>
   </main>
 
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "12e934b415ef417585112e62a015b6f1",
+      // for more configuration options, see https://docs.trackjs.com
+      console: { enabled:true}
+    });
+    
+    class InvalidInputError extends Error {
+      constructor(message){
+        super(message);
+        this.name = "InvalidInputError";
+      }
+    }
+
+    class DivisionByZeroError extends Error {
+      constructor(message){
+        super(message);
+        this.name = "DivisionByZeroError";
+      }
+    }
+
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -95,13 +116,124 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try{
+        let num1 = parseFloat(firstNum);
+        let num2 = parseFloat(secondNum);
+
+        if(isNaN(num1) || isNaN(num2)){
+          throw new InvalidInputError("Please enter a valid number");
+        }
+
+        if(operator === '/' && num2 === 0){
+          throw new DivisionByZeroError("Cannot Divide by zero");
+        }
+
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        console.error("Caught error during calc:", error);
+        output.innerHTML = `Error: ${error.message}`;
+      } finally {
+        console.log("Calc Attempted");
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+
+    const sampleData = {name: "you", age: 300, job: "winner"};
+    const sampleArray = [
+      {name: "tim", age: 10},
+      {name: "Tom" , age: 20}
+    ];
+
+    let timerStart = false;
+
+    errorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const btnText = btn.textContent;
+
+        switch (btnText){
+          case "Console Log":
+          console.log("This is a console.log message", sampleData);
+          break;
+
+        case "Console Error":
+          console.error("This is a console.error message");
+          break;
+
+        case "Console Count":
+          console.count("Console Count Button");
+          break;
+
+        case "Console Warn":
+          console.warn("This is a console.warn message");
+          break;
+
+        case "Console Assert":
+          const isEven = (num) => num % 2 === 0;
+          console.assert(isEven(3), "3 is not an even number!");
+          break;
+
+        case "Console Clear":
+          console.clear();
+          break;
+
+        case "Console Dir":
+          console.dir(document.body);
+          break;
+
+        case "Console dirxml":
+          console.dirxml(document.body);
+          break;
+
+        case "Console Group Start":
+          console.group("Grouped Console Messages");
+          console.log("Message one");
+          console.log("Message two");
+          break;
+
+        case "Console Group End":
+          console.groupEnd();
+          break;
+
+        case "Console Table":
+          console.table(sampleArray);
+          break;
+
+        case "Start Timer":
+          if (!timerStart) {
+            console.time("Demo Timer");
+            timerStart = true;
+          } else {
+            console.warn("Timer already started");
+          }
+          break;
+
+        case "End Timer":
+          if (timerStart) {
+            console.timeEnd("Demo Timer");
+            timerStart = false;
+          } else {
+            console.warn("Start the timer first");
+          }
+          break;
+
+        case "Console Trace":
+          function traceFunction() {
+            console.trace("Trace button clicked");
+          }
+          traceFunction();
+          break;
+
+        case "Trigger a Global Error":
+          TrackJS.track('Testing TrackJS!');
+          break;
+        }
+      });
+    });
+
   </script>
 </body>
 
